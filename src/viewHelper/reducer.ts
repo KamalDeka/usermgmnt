@@ -1,4 +1,6 @@
 import { ACTIONS } from "./contants";
+import _ from "lodash";
+import { getCustomerData } from "../utility";
 
 let initialState = {};
 
@@ -9,10 +11,21 @@ interface Action {
 };
 
 export default function fetchReducer(state: any = initialState, action: Action = {type: Symbol()}): any{
-    let newState = {...state}
+    let newState = _.cloneDeep(state);
     switch(action.type) {
         case ACTIONS.CUSTOMERS_LIST_FETCHED:
             newState.customerList = action.data;
+            return newState;
+        case ACTIONS.CHANGE_ACTIVE_STATE:
+            let customerData = getCustomerData(newState.customerList, action.customerId);
+            if(customerData)
+                customerData.isActive = !customerData.isActive;
+
+            return newState;
+        case ACTIONS.CUSTOMER_DIGEST_FETCHED:
+            newState.digest = newState.digest || {};
+            if(action.customerId)
+                newState.digest[action.customerId] = action.data;
             return newState;
     };
     return state;

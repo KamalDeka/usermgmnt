@@ -6,7 +6,7 @@ export default function AppRoutes() {
     return (
         <BrowserRouter>
             <Route exact path="/">
-                <Redirect to="/customers"/>
+                <Redirect push={false} to="/customers"/>
             </Route>
             <Route exact path="/customers" component={CustomersList}/>
             <Route path="/customer" component={CustomerDetails}/>

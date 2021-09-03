@@ -1,19 +1,24 @@
 import React, { ReactElement, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Grid, Header, Checkbox, Label, Loader, Container} from "semantic-ui-react";
-import { ToggleButton } from "../utility";
+import { Grid, Header, Label, Loader, Container, Segment} from "semantic-ui-react";
+import { Digest, ToggleButton } from "../utility";
 import { getCustomersList } from "../viewHelper/action";
-import { ACTIONS } from "../viewHelper/contants";
 import DataTable from "./customerListTable";
 
-const getCity = (address: string) : string => {
-    let splitted = address.split(",");
-    return splitted && splitted.length > 3 ? splitted[splitted.length - 3]: ""
+interface CityState {
+    City: string,
+    State: string
 }
 
-const getState = (address: string) : string => {
+const getCityState = (address: string) : CityState => {
     let splitted = address.split(",");
-    return splitted && splitted.length > 2 ? splitted[splitted.length - 2]: ""
+    let cityAndState = {
+        City: "",
+        State: ""
+    }
+    cityAndState.City = splitted && splitted.length > 3 ? splitted[splitted.length - 3]: "";
+    cityAndState.State = splitted && splitted.length > 2 ? splitted[splitted.length - 2]: "";
+    return cityAndState;
 }
 
 const columns = [
@@ -24,14 +29,9 @@ const columns = [
         accessor: (row: any): ReactElement => <ToggleButton isActive={!!row?.isActive} customerId={row?._id}/>
     },
     {
-        Header: "First Name",
+        Header: "First, Last Name",
         id: "firstName",
-        accessor: (row: any): string => row?.name?.first
-    },
-    {
-        Header: "Last Name",
-        id: "lastName",
-        accessor: (row: any): string => row?.name?.last
+        accessor: (row: any): string => row?.name?.first + " " + row?.name?.last
     },
     {
         Header: "Company",
@@ -39,14 +39,20 @@ const columns = [
         accessor: (row: any): string => row?.company
     },
     {
-        Header: "City",
+        Header: "City, State",
         id: "City",
-        accessor: (row: any): string => getCity(row?.address)
+        accessor: (row: any): string => {
+            let cityAndState: CityState = getCityState(row?.address);
+            return cityAndState.City + ", " + cityAndState.State;
+        }
     },
     {
-        Header: "State",
-        id: "State",
-        accessor: (row: any): string => getState(row?.address)
+        Header: "Digetst Value",
+        id: "digest",
+        accessor: (row: any) => {
+            let firstLastName = row?.name?.first + row?.name?.last;
+            return <Digest firstLastName={firstLastName} customerId={row?._id} />
+        }
     }
 ]
 
@@ -60,7 +66,9 @@ export default function CustomersList(props: any) {
             dispatch(getCustomersList());
             apiCalled.current = true;
         }
-    })
+        return () => { //do nothing
+        }
+    }, [customerList]);
 
     const activeUsers = customerList?.reduce((totalCount: number, current: any, ): number => {
         if(current.isActive)
@@ -73,18 +81,20 @@ export default function CustomersList(props: any) {
 
     return (
         <Container fluid>
-            <Grid>
-                <Grid.Row>
-                    <Grid.Column>
-                        <Header as="h1">
-                            User Management <Label>{`[${activeUsers} active users]`}</Label>
-                        </Header>
-                    </Grid.Column>
-                </Grid.Row>
-                <Grid.Row>
-                    <Grid.Column><DataTable columns={columns} data={customerList}/></Grid.Column>
-                </Grid.Row>
-            </Grid>
+            <Segment>
+                <Grid>
+                    <Grid.Row>
+                        <Grid.Column>
+                            <Header as="h1">
+                                User Management <Label>{`[${activeUsers} active users]`}</Label>
+                            </Header>
+                        </Grid.Column>
+                    </Grid.Row>
+                    <Grid.Row>
+                        <Grid.Column><DataTable columns={columns} data={customerList}/></Grid.Column>
+                    </Grid.Row>
+                </Grid>
+            </Segment>
         </Container>
     )
 }

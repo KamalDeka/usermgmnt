@@ -23,7 +23,7 @@ const getCityState = (address: string) : CityState => {
 
 const columns = [
     {
-        Header: "",
+        Header: "Active",
         disableSortBy: true,
         id: "isActive",
         accessor: (row: any): ReactElement => <ToggleButton isActive={!!row?.isActive} customerId={row?._id}/>
@@ -49,6 +49,7 @@ const columns = [
     {
         Header: "Digetst Value",
         id: "digest",
+        disableSortBy: true,
         accessor: (row: any) => {
             let firstLastName = row?.name?.first + row?.name?.last;
             return <Digest firstLastName={firstLastName} customerId={row?._id} />
@@ -80,21 +81,19 @@ export default function CustomersList(props: any) {
         return <Loader size="massive"/>
 
     return (
-        <Container fluid>
-            <Segment>
-                <Grid>
-                    <Grid.Row>
-                        <Grid.Column>
-                            <Header as="h1">
-                                User Management <Label>{`[${activeUsers} active users]`}</Label>
-                            </Header>
-                        </Grid.Column>
-                    </Grid.Row>
-                    <Grid.Row>
-                        <Grid.Column><DataTable columns={columns} data={customerList}/></Grid.Column>
-                    </Grid.Row>
-                </Grid>
-            </Segment>
+        <Container fluid className="panel">
+            <Grid style={{marginTop: "15px"}}>
+                <Grid.Row>
+                    <Grid.Column>
+                        <Header as="h1" style={{marginLeft: "10px"}}>
+                            User Management <Label className="activeUserCount">{`[${activeUsers} active users]`}</Label>
+                        </Header>
+                    </Grid.Column>
+                </Grid.Row>
+                <Grid.Row>
+                    <Grid.Column className="customerList"><DataTable columns={columns} data={customerList}/></Grid.Column>
+                </Grid.Row>
+            </Grid>
         </Container>
     )
 }

@@ -1,7 +1,6 @@
-import { type } from "os";
 import React, { useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Container, Grid, Header, Image, Label, Segment, Tab, Table, TableCell } from "semantic-ui-react";
+import { Container, Grid, Header, Image, Label, Segment, Table } from "semantic-ui-react";
 import { CustomerData, getCustomerData, getQueryParams, ToggleButton } from "../utility";
 import { getCustomersList } from "../viewHelper/action";
 
@@ -33,7 +32,7 @@ function CustomerDetailsTable({ data }: { data: any }) {
                     cellContent = data[key].join(",");
                 else
                     cellContent = <CustomerDetailsTable data={data[key]} />
-                customerDetailsRows.push(<Table.Row>
+                customerDetailsRows.push(<Table.Row key={key}>
                     <Table.Cell>{key.toUpperCase()}</Table.Cell>
                     <Table.Cell>{cellContent}</Table.Cell>
                 </Table.Row>);
@@ -79,12 +78,12 @@ export default function CustomerDetails(props: any) {
                             <Image src={customerData?.picture} size="small" />
                         </Grid.Column>
                         <Grid.Column width={10}>
-                            <Header as="h1">
+                            <Header as="h1" style={{marginBottom: "0", marginTop: "5px"}}>
                                 {`${customerData?.name?.first} ${customerData?.name?.last} `}
                             </Header>
-                            <Label>{customerData?.email}</Label>
+                            <Label style={{marginTop: "5px", marginBottom: "10px"}}>{customerData?.email}</Label>
                             <br/>
-                            Active:<ToggleButton customerId={customerData?._id} isActive={!!customerData?.isActive} />
+                            <ToggleButton customerId={customerData?._id} isActive={!!customerData?.isActive} />
                         </Grid.Column>
                     </Grid.Row>
                     <Grid.Row >

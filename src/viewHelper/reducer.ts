@@ -7,7 +7,9 @@ let initialState = {};
 interface Action {
     type: Symbol,
     data?: any,
-    customerId?: string
+    customerId?: string,
+    pageIndex?: number,
+    pageSize?: number
 };
 
 export default function fetchReducer(state: any = initialState, action: Action = {type: Symbol()}): any{
@@ -27,6 +29,13 @@ export default function fetchReducer(state: any = initialState, action: Action =
             if(action.customerId)
                 newState.digest[action.customerId] = action.data;
             return newState;
+        case ACTIONS.SET_PAGE_INDEX:
+            newState.pageIndex = action.pageIndex;
+            return newState;
+        case ACTIONS.SET_PAGE_SIZE:
+            newState.pageSize = action.pageSize;
+            return newState;
+
     };
     return state;
 }

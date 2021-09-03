@@ -69,6 +69,7 @@ export const getCustomerData = (customerList: Array<CustomerData>, customerId: s
 export const Digest = ({firstLastName, customerId} : { firstLastName: string, customerId: string}): ReactElement => {
 	let dispatch = useDispatch();
 	let digestData = useSelector((state: any) => state?.digest);
+	let customerList = useSelector((state: any) => state?.customerList);
 
 	useEffect(()=>{
 		if(!digestData || !digestData[customerId]) {
@@ -77,8 +78,12 @@ export const Digest = ({firstLastName, customerId} : { firstLastName: string, cu
 	}, [digestData, customerId, firstLastName]);
 
 	if(!digestData || !digestData[customerId]) {
-		return <Loader size="tiny" />
+		return <Loader size="small" active inline />
 	}
 
-	return <Label>{digestData[customerId]?.Digest}</Label>
+	const customerData = getCustomerData(customerList, customerId);
+
+	let disabledClass = customerData?.isActive ? "": "disabledPage";
+
+	return <span className={disabledClass}>{digestData[customerId]?.Digest}</span>
 }

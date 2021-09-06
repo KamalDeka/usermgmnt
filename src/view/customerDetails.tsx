@@ -1,8 +1,7 @@
-import React, { useEffect, useRef } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { Container, Grid, Header, Image, Label, Segment, Table } from "semantic-ui-react";
-import { CustomerData, getCustomerData, getQueryParams, ToggleButton } from "../utility";
-import { getCustomersList } from "../viewHelper/action";
+import { useHistory } from "react-router-dom";
+import { Button, Grid, Header, Image, Label, Segment, Table } from "semantic-ui-react";
+import { CustomerData } from "../interfaces";
+import { getCustomerData, getQueryParams, PageLoaderWrapper, ToggleButton, useCustomerList } from "../utility";
 
 
 function CustomerDetailsTable({ data }: { data: any }) {
@@ -12,37 +11,27 @@ function CustomerDetailsTable({ data }: { data: any }) {
         if (data.hasOwnProperty(key)) {
             if (keysToIgnore.includes(key))
                 continue;
+            let content:any = "";
             if(key === "friends") {
                 let listOfFriends = data[key].map((friend: { name: any; }) => friend.name);
-                customerDetailsRows.push(<Table.Row>
-                    <Table.Cell>{key.toUpperCase()}</Table.Cell>
-                    <Table.Cell>{listOfFriends.join(", ")}</Table.Cell>
-                </Table.Row>)
+                content = listOfFriends.join(", ");
                 continue;
             }
             if (typeof data[key] === "string" || typeof data[key] === "number") {
-                let tableRow = <Table.Row key={key}>
-                    <Table.Cell>{key.toUpperCase()}</Table.Cell>
-                    <Table.Cell>{data[key]}</Table.Cell>
-                </Table.Row>
-                customerDetailsRows.push(tableRow)
+                content = data[key];
             } else if (Array.isArray(data[key])) {
-                let cellContent = undefined;
                 if (typeof data[key][0] === "string" || typeof data[key][0] === "number")
-                    cellContent = data[key].join(",");
+                    content = data[key].join(",");
                 else
-                    cellContent = <CustomerDetailsTable data={data[key]} />
-                customerDetailsRows.push(<Table.Row key={key}>
-                    <Table.Cell>{key.toUpperCase()}</Table.Cell>
-                    <Table.Cell>{cellContent}</Table.Cell>
-                </Table.Row>);
+                    content = <CustomerDetailsTable data={data[key]} />
             } else {
-                let tableRow = <Table.Row key={key}>
-                    <Table.Cell>{key}</Table.Cell>
-                    <Table.Cell><CustomerDetailsTable data={data[key]} /></Table.Cell>
-                </Table.Row>
-                customerDetailsRows.push(tableRow);
+                content = <CustomerDetailsTable data={data[key]} />
             }
+
+            customerDetailsRows.push(<Table.Row key={key}>
+                <Table.Cell>{key.toUpperCase()}</Table.Cell>
+                <Table.Cell>{content}</Table.Cell>
+            </Table.Row>);
         }
     }
     return (<Table celled striped>
@@ -53,31 +42,24 @@ function CustomerDetailsTable({ data }: { data: any }) {
 }
 
 export default function CustomerDetails(props: any) {
-    const customerList = useSelector((state: any): any => state?.customerList);
-    const dispatch = useDispatch();
-    const apiCalled = useRef(false);
-
-
-    useEffect(() => {
-        if (!customerList && !apiCalled.current) {
-            //call API if we land on this page directly.
-            dispatch(getCustomersList());
-            apiCalled.current = true;
-        }
-    }, [customerList]);
+    const customerList = useCustomerList();
+    const history = useHistory();
 
     const queryParams = getQueryParams(props.location.search.substring(1));
     const customerData: CustomerData | undefined = getCustomerData(customerList, queryParams?.id);
+    const goBack = () => {
+        history.goBack();
+    }
 
     return (
-        <Container fluid>
+        <PageLoaderWrapper verification={customerList}>
             <Segment>
                 <Grid>
                     <Grid.Row>
                         <Grid.Column style={{textAlign:"right"}} width={2}>
-                            <Image src={customerData?.picture} size="small" />
+                            <Image src={customerData?.picture} size="medium" bordered/>
                         </Grid.Column>
-                        <Grid.Column width={10}>
+                        <Grid.Column width={13}>
                             <Header as="h1" style={{marginBottom: "0", marginTop: "5px"}}>
                                 {`${customerData?.name?.first} ${customerData?.name?.last} `}
                             </Header>
@@ -91,8 +73,13 @@ export default function CustomerDetails(props: any) {
                             <CustomerDetailsTable data={customerData} />
                         </Grid.Column>
                     </Grid.Row>
+                    <Grid.Row>
+                        <Grid.Column>
+                            <Button content="Back" primary onClick={goBack}></Button>
+                        </Grid.Column>
+                    </Grid.Row>
                 </Grid>
             </Segment>
-        </Container>
+        </PageLoaderWrapper>
     )
 }

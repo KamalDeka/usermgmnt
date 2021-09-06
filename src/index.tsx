@@ -1,4 +1,3 @@
-import React from 'react';
 import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
 import reportWebVitals from './reportWebVitals';
@@ -8,11 +7,9 @@ import 'semantic-ui-css/semantic.min.css'
 import "./index.scss"
 
 ReactDOM.render(
-  <React.StrictMode>
     <Provider store={store}>
       <AppRoutes />
-    </Provider>
-  </React.StrictMode>,
+    </Provider>,
   document.getElementById('root')
 );
 

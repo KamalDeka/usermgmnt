@@ -87,3 +87,12 @@ code {
     }
   }
 }
+
+.height_100 {
+  height: calc(100vh);
+}
+
+.centerLoader {
+  top: 45% !important;
+  left: 45% !important;
+}

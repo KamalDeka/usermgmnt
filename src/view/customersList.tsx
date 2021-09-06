@@ -1,25 +1,8 @@
-import React, { ReactElement, useEffect, useRef } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { Grid, Header, Label, Loader, Container, Segment} from "semantic-ui-react";
-import { Digest, ToggleButton } from "../utility";
-import { getCustomersList } from "../viewHelper/action";
+import React, { ReactElement } from "react";
+import { Grid, Header, Label } from "semantic-ui-react";
+import { CityState } from "../interfaces";
+import { Digest, getActiveUserCount, getCityState, PageLoaderWrapper, ToggleButton, useCustomerList } from "../utility";
 import DataTable from "./customerListTable";
-
-interface CityState {
-    City: string,
-    State: string
-}
-
-const getCityState = (address: string) : CityState => {
-    let splitted = address.split(",");
-    let cityAndState = {
-        City: "",
-        State: ""
-    }
-    cityAndState.City = splitted && splitted.length > 3 ? splitted[splitted.length - 3]: "";
-    cityAndState.State = splitted && splitted.length > 2 ? splitted[splitted.length - 2]: "";
-    return cityAndState;
-}
 
 const columns = [
     {
@@ -57,31 +40,12 @@ const columns = [
     }
 ]
 
-export default function CustomersList(props: any) {
-    const customerList = useSelector((state: any): any => state?.customerList);
-    const dispatch = useDispatch();
-    const apiCalled = useRef(false);
-
-    useEffect(()=>{
-        if(!customerList && !apiCalled.current) {
-            dispatch(getCustomersList());
-            apiCalled.current = true;
-        }
-        return () => { //do nothing
-        }
-    }, [customerList]);
-
-    const activeUsers = customerList?.reduce((totalCount: number, current: any, ): number => {
-        if(current.isActive)
-            return totalCount + 1;
-        return totalCount;
-    }, 0);
-    
-    if(!customerList)
-        return <Loader size="massive"/>
+const CustomersList = React.memo(()=>{
+    const customerList = useCustomerList();
+    const activeUsers = getActiveUserCount(customerList);
 
     return (
-        <Container fluid className="panel">
+        <PageLoaderWrapper verification={customerList}>
             <Grid style={{marginTop: "15px"}}>
                 <Grid.Row>
                     <Grid.Column>
@@ -91,9 +55,16 @@ export default function CustomersList(props: any) {
                     </Grid.Column>
                 </Grid.Row>
                 <Grid.Row>
-                    <Grid.Column className="customerList"><DataTable columns={columns} data={customerList}/></Grid.Column>
+                    <Grid.Column className="customerList">
+                        <DataTable columns={columns} 
+                            data={customerList} 
+                            pageSizes={[10, 15, 30, 40, 50]} 
+                            initialPageSize={15}/>
+                    </Grid.Column>
                 </Grid.Row>
             </Grid>
-        </Container>
+        </PageLoaderWrapper>
     )
-}
+});
+
+export default CustomersList;

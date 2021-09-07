@@ -5,7 +5,7 @@ import { ACTIONS } from "./viewHelper/contants";
 import _ from "lodash";
 import { ReactElement, useEffect, useRef } from "react";
 import { getCustomersList, getDigestValue } from "./viewHelper/action";
-import { CityState, CustomerData, queryParams } from "./interfaces";
+import { CityState, CustomerData, queryParams, sortinfo } from "./interfaces";
 
 
 export function getQueryParams(queryString: string): queryParams {
@@ -33,26 +33,24 @@ export const getCustomerData = (customerList: Array<CustomerData>, customerId: s
 
 export const Digest = React.memo(({firstLastName, customerId} : { firstLastName: string, customerId: string}): ReactElement => {
 	let dispatch = useDispatch();
-	let digestData = useSelector((state: any) => state?.digest);
 	let customerList = useSelector((state: any) => state?.customerList);
-	let apiCalled = useRef(false);
 
 	useEffect(()=>{
-		if((!digestData || !digestData[customerId]) && !apiCalled.current) {
+		let customerData = getCustomerData(customerList, customerId);
+		if(!customerData?.digest && !customerData?.digestFetchInitiated) {
 			dispatch(getDigestValue(firstLastName, customerId));
-			apiCalled.current = true;
 		}
-	}, [digestData, customerId, firstLastName, dispatch]);
-
-	if(!digestData || !digestData[customerId]) {
-		return <Loader size="small" active inline />
-	}
+	}, [customerList, customerId, firstLastName, dispatch]);
 
 	const customerData = getCustomerData(customerList, customerId);
 
+	if(!customerData?.digest) {
+		return <Loader size="small" active inline />
+	}
+
 	let disabledClass = customerData?.isActive ? "": "disabledPage";
 
-	return <span className={disabledClass}>{digestData[customerId]?.Digest}</span>
+	return <span className={disabledClass}>{customerData?.digest}</span>
 });
 
 export const useCustomerList = () => {
@@ -101,4 +99,33 @@ export const getActiveUserCount = (customerList : Array<CustomerData>) => {
     }, 0);
 
 	return activeUsers;
+}
+
+export const SortData = (customerList: Array<CustomerData>, sortBy: Array<sortinfo> | undefined) => {
+	if(sortBy && sortBy.length > 0 ) {
+		let sortId = sortBy[0].id,	
+			desc = sortBy[0].desc;
+		return customerList.sort((rowA: CustomerData, rowB: CustomerData) : number => {
+			let rowASmaller: boolean = true;
+			if(sortId === "firstName") {
+				rowASmaller = `${rowA?.name?.first} ${rowA?.name?.last}` < `${rowB?.name?.first} ${rowB?.name?.last}`;
+			} else if(sortId === "company") {
+				rowASmaller = rowA.company < rowB.company;
+			} else if(sortId === "city") {
+				let cityAndState: CityState = getCityState(rowA?.address);
+				let cityAndStateA = cityAndState.City + ", " + cityAndState.State;
+				cityAndState = getCityState(rowB?.address);
+				let cityAndStateB = cityAndState.City + ", " + cityAndState.State;
+				rowASmaller = cityAndStateA < cityAndStateB;
+			}
+
+			if(rowASmaller) {
+				return desc ? 1 : -1;
+			} else {
+				return desc ? -1 : 1;
+			}
+
+		});
+	}
+	return customerList;
 }

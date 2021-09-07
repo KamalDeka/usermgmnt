@@ -5,7 +5,7 @@ import { getCustomerData, getQueryParams, PageLoaderWrapper, ToggleButton, useCu
 
 
 function CustomerDetailsTable({ data }: { data: any }) {
-    const keysToIgnore = ["isActive", "picture", "_id", "index", "guid", "name", "email"]
+    const keysToIgnore = ["isActive", "picture", "_id", "index", "guid", "name", "email", "digestFetchInitiated", "digest"]
     let customerDetailsRows = [];
     for (let key in data) {
         if (data.hasOwnProperty(key)) {

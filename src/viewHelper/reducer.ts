@@ -1,6 +1,6 @@
 import { ACTIONS } from "./contants";
 import _ from "lodash";
-import { getCustomerData } from "../utility";
+import { getCustomerData, SortData } from "../utility";
 import { Action } from "../interfaces";
 
 let initialState = {};
@@ -17,15 +17,24 @@ export default function fetchReducer(state: any = initialState, action: Action =
                 customerData.isActive = !customerData.isActive;
             return newState;
         case ACTIONS.CUSTOMER_DIGEST_FETCHED:
-            newState.digest = newState.digest || {};
-            if(action.customerId)
-                newState.digest[action.customerId] = action.data;
+            let custData = getCustomerData(newState.customerList, action.customerId);
+            if(custData) {
+                custData.digest = action.data?.Digest;
+            }
             return newState;
         case ACTIONS.SET_PAGE_INDEX:
             newState.pageIndex = action.pageIndex;
             return newState;
         case ACTIONS.SET_PAGE_SIZE:
             newState.pageSize = action.pageSize;
+            return newState;
+        case ACTIONS.SORT_DATA:
+            newState.customerList = SortData(newState.customerList, action.sortBy);
+            return newState;
+        case ACTIONS.CUSTOMER_DIGEST_FETCH_INITIATED:
+            let data = getCustomerData(newState.customerList, action.customerId);
+            if(data)
+                data.digestFetchInitiated = true;
             return newState;
     };
     return state;

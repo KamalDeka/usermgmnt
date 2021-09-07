@@ -30,11 +30,18 @@ export interface CustomerData {
 	range: Array<number>,
 	friends: Array<Friend>,
     greeting: string,
-    favoriteFruit: string
+    favoriteFruit: string,
+    digest?: string,
+    digestFetchInitiated? : boolean
 }
 
 export interface queryParams {
     [x:string]: string
+}
+
+export interface sortinfo {
+    id: string,
+    desc: boolean
 }
 
 export interface Action {
@@ -42,7 +49,8 @@ export interface Action {
     data?: any,
     customerId?: string,
     pageIndex?: number,
-    pageSize?: number
+    pageSize?: number,
+    sortBy?: Array<sortinfo>
 };
 
 export interface CityState {

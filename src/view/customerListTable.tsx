@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useTable, useSortBy, usePagination } from "react-table";
 import { useHistory } from "react-router-dom";
 import { Icon, Segment } from "semantic-ui-react";
@@ -133,12 +133,14 @@ const DataTable = React.memo((
         columns, 
         data, 
         pageSizes, 
-        initialPageSize
+        initialPageSize,
+        handleSort
     }: { 
         columns: any; 
         data: any; 
         pageSizes: Array<number>; 
-        initialPageSize: number 
+        initialPageSize: number;
+        handleSort: (sortBy: any) => void;
     }) => {
     const size = useSelector((state: any) => state?.pageSize);
     const index = useSelector((state: any) => state?.pageIndex);
@@ -157,16 +159,21 @@ const DataTable = React.memo((
         nextPage,
         previousPage,
         setPageSize,
-        state: {pageIndex, pageSize}
+        state: {pageIndex, pageSize, sortBy}
     } = useTable(
         {
             columns,
             data,
             initialState: { pageIndex: index || 0 , pageSize: size || initialPageSize },
+            manualSortBy: true
         },
         useSortBy,
         usePagination,
     );   
+
+    useEffect(()=>{
+        handleSort(sortBy);
+    }, [handleSort, sortBy])
 
     return (
         <Segment>

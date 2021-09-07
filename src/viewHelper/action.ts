@@ -18,6 +18,8 @@ export function getCustomersList(): (dispatch: (x:any) => void) => void {
 export function getDigestValue(firstLastName: string, customerId: string): (dispatch: (x:any)=>void) => void {
     return (dispatch: (x:any) => void): void => {
 
+        dispatch({type: ACTIONS.CUSTOMER_DIGEST_FETCH_INITIATED, customerId: customerId});
+
         let params = {
             value: firstLastName
         }

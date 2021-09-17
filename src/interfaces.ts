@@ -8,7 +8,7 @@ export interface Friend {
 	name: string
 }
 
-export interface CustomerData {
+export interface ICustomer {
 	isActive: boolean,
 	_id: string,
     index: number,
@@ -39,21 +39,25 @@ export interface queryParams {
     [x:string]: string
 }
 
-export interface sortinfo {
+export interface ISortInfo {
     id: string,
     desc: boolean
 }
 
 export interface Action {
-    type: Symbol,
+    type: string,
     data?: any,
     customerId?: string,
     pageIndex?: number,
     pageSize?: number,
-    sortBy?: Array<sortinfo>
+    sortBy?: Array<ISortInfo>
 };
 
 export interface CityState {
     City: string,
     State: string
+}
+
+export interface ICustomerActiveState {
+    [x:string]: boolean
 }

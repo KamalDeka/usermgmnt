@@ -1,20 +1,27 @@
 import { ACTIONS } from "./contants";
 import _ from "lodash";
-import { getCustomerData, SortData } from "../utility";
-import { Action } from "../interfaces";
+import { getCustomerData, SortData, updateLocalStorage } from "../utility";
+import { Action, ICustomer } from "../interfaces";
 
 let initialState = {};
 
-export default function fetchReducer(state: any = initialState, action: Action = {type: Symbol()}): any{
+export default function fetchReducer(state: any = initialState, action: Action = {type: ""}): any{
     let newState = _.cloneDeep(state);
     switch(action.type) {
         case ACTIONS.CUSTOMERS_LIST_FETCHED:
             newState.customerList = action.data;
             return newState;
+        case ACTIONS.CUSTOMER_UPDATED:
+            newState.customerList.forEach((customerData: ICustomer)=>{
+                customerData.isActive = action.data[customerData._id];
+            })
+            return newState;
         case ACTIONS.CHANGE_ACTIVE_STATE:
             let customerData = getCustomerData(newState.customerList, action.customerId);
             if(customerData)
                 customerData.isActive = !customerData.isActive;
+
+            updateLocalStorage(newState.customerList);
             return newState;
         case ACTIONS.CUSTOMER_DIGEST_FETCHED:
             let custData = getCustomerData(newState.customerList, action.customerId);
@@ -35,7 +42,8 @@ export default function fetchReducer(state: any = initialState, action: Action =
             let data = getCustomerData(newState.customerList, action.customerId);
             if(data)
                 data.digestFetchInitiated = true;
-            return newState;
+            return newState;            
+        default:
+            return state;
     };
-    return state;
 }

@@ -1,8 +1,10 @@
 import { BrowserRouter, Redirect, Route } from "react-router-dom";
+import { listenOnLocalStorage } from "../utility";
 import CustomerDetails from "./customerDetails";
 import CustomersList from "./customersList";
 
 export default function AppRoutes() {
+    listenOnLocalStorage();
     return (
         <BrowserRouter>
             <Route exact path="/">

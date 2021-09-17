@@ -53,6 +53,7 @@ const TableRows = React.memo(({page, prepareRow}: {page: any, prepareRow: (x:any
 
 const Pagination = React.memo((
     { 
+        dataLen,
         pageCount,
         pageOptions,
         canPreviousPage,
@@ -65,6 +66,7 @@ const Pagination = React.memo((
         setPageSize,
         pageSizes       
     }: {
+        dataLen: number,
         pageCount: number;
         pageOptions: number[];
         canPreviousPage: boolean;
@@ -81,8 +83,17 @@ const Pagination = React.memo((
     const dispatch = useDispatch();
 
     const onPageSizeChange = (e: any) => {
-        setPageSize(Number(e.target.value));
-        dispatch({type: ACTIONS.SET_PAGE_SIZE, pageSize: pageSize});
+        let pgSize = Number(e.target.value)
+        setPageSize(pgSize);
+        
+        dispatch({type: ACTIONS.SET_PAGE_SIZE, pageSize: pgSize});
+        let newPageCount = Math.ceil(dataLen / pgSize);
+        if(pageCount - 1 === pageIndex) {
+            dispatch({type: ACTIONS.SET_PAGE_INDEX, pageIndex: (newPageCount - 1 )});
+        } else {
+            let newPageIndex = Math.floor((pageSize * pageIndex) / pgSize);
+            dispatch({type: ACTIONS.SET_PAGE_INDEX, pageIndex: newPageIndex});
+        }
     }
 
     const pageSizeOptions = () => {
@@ -142,8 +153,8 @@ const DataTable = React.memo((
         initialPageSize: number;
         handleSort: (sortBy: any) => void;
     }) => {
-    const size = useSelector((state: any) => state?.pageSize);
-    const index = useSelector((state: any) => state?.pageIndex);
+    const size = useSelector((state: any) => state?.pageSize || initialPageSize);
+    const index = useSelector((state: any) => state?.pageIndex || 0);
     
     const {
         getTableProps,
@@ -164,7 +175,7 @@ const DataTable = React.memo((
         {
             columns,
             data,
-            initialState: { pageIndex: index || 0 , pageSize: size || initialPageSize },
+            initialState: { pageIndex: index , pageSize: size },
             manualSortBy: true
         },
         useSortBy,
@@ -173,7 +184,7 @@ const DataTable = React.memo((
 
     useEffect(()=>{
         handleSort(sortBy);
-    }, [handleSort, sortBy])
+    }, [handleSort, sortBy]);
 
     return (
         <Segment>
@@ -184,6 +195,7 @@ const DataTable = React.memo((
                 </tbody>
             </table>
             <Pagination 
+                dataLen={data.length}
                 pageCount={pageCount}
                 pageIndex={pageIndex}
                 pageOptions={pageOptions}
@@ -195,7 +207,6 @@ const DataTable = React.memo((
                 previousPage={previousPage} 
                 setPageSize={setPageSize}
                 pageSizes={pageSizes}/>
-            
         </Segment>
     );
 });

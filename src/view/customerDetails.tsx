@@ -1,6 +1,6 @@
 import { useHistory } from "react-router-dom";
 import { Button, Grid, Header, Image, Label, Segment, Table } from "semantic-ui-react";
-import { CustomerData } from "../interfaces";
+import { ICustomer } from "../interfaces";
 import { getCustomerData, getQueryParams, PageLoaderWrapper, ToggleButton, useCustomerList } from "../utility";
 
 
@@ -46,7 +46,7 @@ export default function CustomerDetails(props: any) {
     const history = useHistory();
 
     const queryParams = getQueryParams(props.location.search.substring(1));
-    const customerData: CustomerData | undefined = getCustomerData(customerList, queryParams?.id);
+    const customerData: ICustomer | undefined = getCustomerData(customerList, queryParams?.id);
     const goBack = () => {
         history.goBack();
     }

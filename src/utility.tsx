@@ -5,7 +5,8 @@ import { ACTIONS } from "./viewHelper/contants";
 import _ from "lodash";
 import { ReactElement, useEffect, useRef } from "react";
 import { getCustomersList, getDigestValue } from "./viewHelper/action";
-import { CityState, CustomerData, queryParams, sortinfo } from "./interfaces";
+import { CityState, ICustomer, queryParams, ISortInfo, ICustomerActiveState } from "./interfaces";
+import store from "./viewHelper/store";
 
 
 export function getQueryParams(queryString: string): queryParams {
@@ -25,8 +26,8 @@ export const ToggleButton = ({isActive, customerId}: {isActive: boolean, custome
     }}/>
 }
 
-export const getCustomerData = (customerList: Array<CustomerData>, customerId: string | undefined): CustomerData | undefined => {
-	let customerData: CustomerData | undefined = _.find(customerList, (customerObj) => customerObj._id === customerId);
+export const getCustomerData = (customerList: Array<ICustomer>, customerId: string | undefined): ICustomer | undefined => {
+	let customerData: ICustomer | undefined = _.find(customerList, (customerObj) => customerObj._id === customerId);
 
 	return customerData;
 }
@@ -91,7 +92,7 @@ export const getCityState = (address: string) : CityState => {
     return cityAndState;
 }
 
-export const getActiveUserCount = (customerList : Array<CustomerData>) => {
+export const getActiveUserCount = (customerList : Array<ICustomer>) => {
 	const activeUsers = customerList?.reduce((totalCount: number, current: any, ): number => {
         if(current.isActive)
             return totalCount + 1;
@@ -101,11 +102,11 @@ export const getActiveUserCount = (customerList : Array<CustomerData>) => {
 	return activeUsers;
 }
 
-export const SortData = (customerList: Array<CustomerData>, sortBy: Array<sortinfo> | undefined) => {
+export const SortData = (customerList: Array<ICustomer>, sortBy: Array<ISortInfo> | undefined) => {
 	if(sortBy && sortBy.length > 0 ) {
 		let sortId = sortBy[0].id,	
 			desc = sortBy[0].desc;
-		return customerList.sort((rowA: CustomerData, rowB: CustomerData) : number => {
+		return customerList.sort((rowA: ICustomer, rowB: ICustomer) : number => {
 			let rowASmaller: boolean = true;
 			if(sortId === "firstName") {
 				rowASmaller = `${rowA?.name?.first} ${rowA?.name?.last}` < `${rowB?.name?.first} ${rowB?.name?.last}`;
@@ -128,4 +129,23 @@ export const SortData = (customerList: Array<CustomerData>, sortBy: Array<sortin
 		});
 	}
 	return customerList;
+}
+
+export const updateLocalStorage = (customerList: Array<ICustomer>) => {
+	let customerActiveState: ICustomerActiveState = {};
+	customerList.forEach((customerData: ICustomer)=>{
+		customerActiveState[customerData._id] = customerData.isActive;
+	})
+	window.localStorage.setItem("CustomerList", JSON.stringify(customerActiveState));
+}
+
+export const listenOnLocalStorage = () => {
+	window.addEventListener('storage', () => {
+		let customerList: string | null = window.localStorage.getItem("CustomerList");
+
+		if(customerList) {
+			let customersActiveState: ICustomerActiveState = JSON.parse(customerList);
+			store.dispatch({type: ACTIONS.CUSTOMER_UPDATED, data: customersActiveState});
+		}
+	});
 }
